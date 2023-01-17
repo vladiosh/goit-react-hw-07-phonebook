@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { NameLabel, Input, FormBlock } from './ContactForm.styled';
 import { useDispatch, useSelector } from 'react-redux';
+import { NameLabel, Input, FormBlock } from './ContactForm.styled';
+import { addContact } from '../../redux/operations';
 import { getContacts } from '../../redux/selectors';
-import { addContact } from '../../redux/contactsSlice';
 
 const ContactForm = () => {
   const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
+  const [phone, setPhone] = useState('');
 
   const contacts = useSelector(getContacts);
   const dispatch = useDispatch();
@@ -14,29 +14,29 @@ const ContactForm = () => {
   const handleSubmit = event => {
     event.preventDefault();
 
+    const name = event.target.elements.name.value;
+    const phone = event.target.elements.phone.value;
+
     const newContact = contacts.find(contact => contact.name === name);
     if (newContact) {
       alert(`${name} is already in contacts`);
       return;
     }
 
-    dispatch(addContact(name, number));
+    dispatch(addContact({ name, phone }));
 
     reset();
   };
 
   const handleChange = event => {
     const { name, value } = event.target;
-
     switch (name) {
       case 'name':
         setName(value);
         break;
-
-      case 'number':
-        setNumber(value);
+      case 'phone':
+        setPhone(value);
         break;
-
       default:
         return;
     }
@@ -44,7 +44,7 @@ const ContactForm = () => {
 
   const reset = () => {
     setName('');
-    setNumber('');
+    setPhone('');
   };
 
   return (
@@ -67,10 +67,10 @@ const ContactForm = () => {
           <NameLabel>
             Number
             <Input
-              value={number}
+              value={phone}
               onChange={handleChange}
               type="tel"
-              name="number"
+              name="phone"
               pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
               title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
               required
