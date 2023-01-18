@@ -7,76 +7,47 @@ const contactsInitialState = {
   error: null,
 };
 
+const handlePending = state => {
+  state.isLoading = true;
+};
+
+const handleRejected = (state, action) => {
+  state.isLoading = false;
+  state.error = action.payload;
+};
+
 const contactsSlise = createSlice({
   name: 'contacts',
   initialState: contactsInitialState,
   extraReducers: {
-    [fetchContacts.pending]: state => {
-      return {
-        ...state,
-        isLoading: true,
-      };
-    },
+    [fetchContacts.pending]: handlePending,
     [fetchContacts.fulfilled]: (state, action) => {
-      return {
-        ...state,
-        items: [...action.payload],
-        isLoading: false,
-        error: null,
-      };
+      state.isLoading = false;
+      state.error = null;
+      state.items = action.payload;
     },
-    [fetchContacts.rejected]: (state, action) => {
-      return {
-        ...state,
-        isLoading: false,
-        error: action.payload,
-      };
-    },
+    [fetchContacts.rejected]: handleRejected,
 
-    [addContact.pending]: state => {
-      return {
-        ...state,
-        isLoading: true,
-      };
+    [addContact.pending]: handlePending,
+    [addContact.fulfilled](state, action) {
+      state.isLoading = false;
+      state.error = null;
+      state.items.push(action.payload);
     },
-    [addContact.fulfilled]: (state, action) => {
-      return {
-        ...state,
-        items: [action.payload, ...state.items],
-        isLoading: false,
-        error: null,
-      };
+    [addContact.rejected]: handleRejected,
+
+    [deleteContact.pending]: handlePending,
+    [deleteContact.fulfilled](state, action) {
+      state.isLoading = false;
+      state.error = null;
+      // state.items.filter(({ id }) => id !== action.payload.id);
+      const index = state.items.findIndex(
+        task => task.id === action.payload.id
+      );
+      state.items.splice(index, 1);
     },
-    [addContact.rejected]: (state, action) => {
-      return {
-        ...state,
-        isLoading: false,
-        error: action.payload,
-      };
-    },
-    [deleteContact.pending]: state => {
-      return {
-        ...state,
-        isLoading: true,
-      };
-    },
-    [deleteContact.fulfilled]: (state, action) => {
-      return {
-        ...state,
-        items: state.items.filter(({ id }) => id !== action.payload.id),
-        isLoading: false,
-        error: null,
-      };
-    },
-    [deleteContact.rejected]: (state, action) => {
-      return {
-        ...state,
-        isLoading: false,
-        error: action.payload,
-      };
-    },
+    [deleteContact.rejected]: handleRejected,
   },
 });
 
-// export const { addContact, deleteContact } = contactsSlise.actions;
 export const contactReducer = contactsSlise.reducer;
